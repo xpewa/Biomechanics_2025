@@ -129,29 +129,123 @@ def animate_3d_scatter(time, data, output_filename):
     ani = animation.FuncAnimation(fig, update, frames=num_frames, blit=False, repeat=True)  # blit=False важно для 3D
     ani.save(output_filename, writer='ffmpeg', fps=30)  # writer='imagemagick'
 
+
+def fit_polynomials(phi1, time1, phi2, time2, phi3, time3):
+    if not np.array_equal(time1, time2):
+        phi2 = np.interp(time1, time2, phi2)
+    if not np.array_equal(time1, time3):
+        phi3 = np.interp(time1, time3, phi3)
+
+    # Создаем матрицу A для метода наименьших квадратов (phi1^0, phi1^1, phi1^2, phi1^3)
+    A = np.vstack([phi1**0, phi1**1, phi1**2, phi1**3]).T
+    # A * lambda_coeffs = phi2
+    lambda_coeffs, _, _, _ = np.linalg.lstsq(A, phi2, rcond=None)
+    # A * betta_coeffs = phi3
+    betta_coeffs, _, _, _ = np.linalg.lstsq(A, phi3, rcond=None)
+
+    return lambda_coeffs, betta_coeffs
+
 if __name__ == '__main__':
+    frame_sit_1_start = 200 # 200
+    frame_sit_1_end = 270 # 315
+    frame_stand_1_start = 400
+    frame_stand_1_end = 515
+
+    # time, data = read_data_pos(path_exp_1_pos)
+    # animate_3d_scatter(time, data, "anim/animation_1.mp4")
+
     time_hr, hr_angle = read_data(path_exp_1_angle_h_l)
     time_kr, kr_angle = read_data(path_exp_1_angle_k_l)
     time_lr, lr_angle = read_data(path_exp_1_angle_l_l)
 
-    fig, axes = plt.subplots(3, 1, figsize=(8, 12))  # 3 строки, 1 столбец
-    axes[0].plot(time_hr, hr_angle)
-    axes[0].set_xlabel("Время (секунды)")
-    axes[0].set_ylabel("HR_Angle (градусы)")
-    axes[0].set_title("Зависимость HR_Angle от времени")
-    axes[0].grid(True)
-    axes[1].plot(time_kr, kr_angle)
-    axes[1].set_xlabel("Время (секунды)")
-    axes[1].set_ylabel("KR_Angle (градусы)")
-    axes[1].set_title("Зависимость KR_Angle от времени")
-    axes[1].grid(True)
-    axes[2].plot(time_lr, lr_angle)
-    axes[2].set_xlabel("Время (секунды)")
-    axes[2].set_ylabel("LR_Angle (градусы)")
-    axes[2].set_title("Зависимость LR_Angle от времени")
-    axes[2].grid(True)
-    plt.tight_layout() # Автоматическая подгонка расположения графиков, чтобы избежать наложений
-    plt.show()
+    time_hl, hl_angle = read_data(path_exp_1_angle_h_l)
+    time_kl, kl_angle = read_data(path_exp_1_angle_k_l)
+    time_ll, ll_angle = read_data(path_exp_1_angle_l_l)
 
-    time, data = read_data_pos(path_exp_1_pos)
-    animate_3d_scatter(time, data, "anim/animation_1.mp4")
+    # fig, axes = plt.subplots(3, 1, figsize=(8, 12))  # 3 строки, 1 столбец
+    # axes[0].plot(time_hr, hr_angle)
+    # axes[0].set_xlabel("Время (секунды)")
+    # axes[0].set_ylabel("HR_Angle (градусы)")
+    # axes[0].set_title("Зависимость HR_Angle от времени")
+    # axes[0].grid(True)
+    # axes[1].plot(time_kr, kr_angle)
+    # axes[1].set_xlabel("Время (секунды)")
+    # axes[1].set_ylabel("KR_Angle (градусы)")
+    # axes[1].set_title("Зависимость KR_Angle от времени")
+    # axes[1].grid(True)
+    # axes[2].plot(time_lr, lr_angle)
+    # axes[2].set_xlabel("Время (секунды)")
+    # axes[2].set_ylabel("LR_Angle (градусы)")
+    # axes[2].set_title("Зависимость LR_Angle от времени")
+    # axes[2].grid(True)
+    # plt.tight_layout() # Автоматическая подгонка расположения графиков, чтобы избежать наложений
+    # plt.show()
+
+    time_hr = time_hr[frame_sit_1_start:frame_sit_1_end]
+    hr_angle = hr_angle[frame_sit_1_start:frame_sit_1_end]
+    time_kr = time_kr[frame_sit_1_start:frame_sit_1_end]
+    kr_angle = kr_angle[frame_sit_1_start:frame_sit_1_end]
+    time_lr = time_lr[frame_sit_1_start:frame_sit_1_end]
+    lr_angle = lr_angle[frame_sit_1_start:frame_sit_1_end]
+
+    # fig, axes = plt.subplots(3, 1, figsize=(8, 12))  # 3 строки, 1 столбец
+    # axes[0].plot(time_hr, hr_angle)
+    # axes[0].set_xlabel("Время (секунды)")
+    # axes[0].set_ylabel("HR_Angle (градусы)")
+    # axes[0].set_title("Зависимость HR_Angle от времени")
+    # axes[0].grid(True)
+    # axes[1].plot(time_kr, kr_angle)
+    # axes[1].set_xlabel("Время (секунды)")
+    # axes[1].set_ylabel("KR_Angle (градусы)")
+    # axes[1].set_title("Зависимость KR_Angle от времени")
+    # axes[1].grid(True)
+    # axes[2].plot(time_lr, lr_angle)
+    # axes[2].set_xlabel("Время (секунды)")
+    # axes[2].set_ylabel("LR_Angle (градусы)")
+    # axes[2].set_title("Зависимость LR_Angle от времени")
+    # axes[2].grid(True)
+    # plt.tight_layout()
+    # plt.show()
+
+    # fig, axes = plt.subplots(2, 1, figsize=(8, 12))  # 3 строки, 1 столбец
+    # axes[0].plot(lr_angle, hr_angle)
+    # axes[0].set_xlabel("Время (секунды)")
+    # axes[0].set_ylabel("HR_Angle (lr_angle)")
+    # axes[0].set_title("Зависимость HR_Angle от lr_angle")
+    # axes[0].grid(True)
+    # axes[1].plot(lr_angle, kr_angle)
+    # axes[1].set_xlabel("Время (секунды)")
+    # axes[1].set_ylabel("KR_Angle (lr_angle)")
+    # axes[1].set_title("Зависимость KR_Angle от lr_angle")
+    # axes[1].grid(True)
+    # plt.tight_layout()
+    # plt.show()
+
+    lambda_coeffs, betta_coeffs = fit_polynomials(lr_angle, time_lr, kr_angle, time_kr, hr_angle, time_hr)
+
+    print("Коэффициенты lambda:", lambda_coeffs)
+    print("Коэффициенты betta:", betta_coeffs)
+
+    phi2_approx = np.polyval(lambda_coeffs[::-1], lr_angle)  # Переворачиваем порядок коэффициентов для polyval
+    phi3_approx = np.polyval(betta_coeffs[::-1], lr_angle)
+
+    plt.figure(figsize=(12, 6))
+
+    plt.subplot(1, 2, 1)
+    plt.plot(lr_angle, kr_angle, label="phi2 (оригинал)")
+    plt.plot(lr_angle, phi2_approx, label="phi2 (аппроксимация)")
+    plt.xlabel("lr_angle")
+    plt.ylabel("phi2")
+    plt.legend()
+    plt.grid(True)
+
+    plt.subplot(1, 2, 2)
+    plt.plot(lr_angle, hr_angle, label="phi3 (оригинал)")
+    plt.plot(lr_angle, phi3_approx, label="phi3 (аппроксимация)")
+    plt.xlabel("lr_angle")
+    plt.ylabel("phi3")
+    plt.legend()
+    plt.grid(True)
+
+    plt.tight_layout()
+    plt.show()
