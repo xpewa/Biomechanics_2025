@@ -129,21 +129,17 @@ def animate_3d_scatter(time, data, output_filename):
     ani = animation.FuncAnimation(fig, update, frames=num_frames, blit=False, repeat=True)  # blit=False важно для 3D
     ani.save(output_filename, writer='ffmpeg', fps=30)  # writer='imagemagick'
 
-
-def fit_polynomials(phi1, time1, phi2, time2, phi3, time3):
+def fit_polynomials(dim, phi1, time1, phi2, time2):
     if not np.array_equal(time1, time2):
         phi2 = np.interp(time1, time2, phi2)
-    if not np.array_equal(time1, time3):
-        phi3 = np.interp(time1, time3, phi3)
 
-    # Создаем матрицу A для метода наименьших квадратов (phi1^0, phi1^1, phi1^2, phi1^3)
-    A = np.vstack([phi1**0, phi1**1, phi1**2, phi1**3]).T
-    # A * lambda_coeffs = phi2
-    lambda_coeffs, _, _, _ = np.linalg.lstsq(A, phi2, rcond=None)
-    # A * betta_coeffs = phi3
-    betta_coeffs, _, _, _ = np.linalg.lstsq(A, phi3, rcond=None)
-
-    return lambda_coeffs, betta_coeffs
+    # Создаем список столбцов матрицы A
+    columns = [phi1 ** i for i in range(dim + 1)]
+    # Создаем матрицу A для метода наименьших квадратов (phi1^0, phi1^1, phi1^2, phi1^3, ...)
+    A = np.vstack(columns).T
+    # A * coeffs = phi2
+    coeffs, _, _, _ = np.linalg.lstsq(A, phi2, rcond=None)
+    return coeffs
 
 if __name__ == '__main__':
     frame_sit_1_start = 200 # 200
@@ -221,10 +217,8 @@ if __name__ == '__main__':
     # plt.tight_layout()
     # plt.show()
 
-    lambda_coeffs, betta_coeffs = fit_polynomials(lr_angle, time_lr, kr_angle, time_kr, hr_angle, time_hr)
-
-    print("Коэффициенты lambda:", lambda_coeffs)
-    print("Коэффициенты betta:", betta_coeffs)
+    lambda_coeffs = fit_polynomials(3, lr_angle, time_lr, kr_angle, time_kr)
+    betta_coeffs = fit_polynomials(3, lr_angle, time_lr, hr_angle, time_hr)
 
     phi2_approx = np.polyval(lambda_coeffs[::-1], lr_angle)  # Переворачиваем порядок коэффициентов для polyval
     phi3_approx = np.polyval(betta_coeffs[::-1], lr_angle)
